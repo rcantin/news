@@ -1,0 +1,67 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>February 2025 Crime Summary for Waterdown and Flamborough</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+    <div class="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg mt-8">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">February 2025 Crime Summary for Waterdown and Flamborough</h1>
+
+        <section class="mb-8">
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4">Crime Events</h2>
+            <p class="text-gray-600">No specific crime events for Waterdown or Flamborough in February 2025 were reported in available sources.</p>
+        </section>
+
+        <section>
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4">General Trends</h2>
+            <ul class="list-disc pl-5 text-gray-600">
+                <li><strong>Data Limitations:</strong> No specific crime events for Waterdown or Flamborough in February 2025 were found in available sources. Incidents outside the area, such as a youth crime initiative on Hamilton Mountain, were not included.</li>
+                <li><strong>Crime Statistics:</strong> Flamborough (Ward 15) remains relatively safe, with 2,167 police calls in 2023, down 0.6% from 2,181 in 2022. Auto thefts (70 calls, up 62.8%) and neighbour disputes (61 calls, up 60.5%) increased. Common issues include domestic violence (107 calls) and motor vehicle accidents (128 calls).</li>
+                <li><strong>Ongoing Concerns:</strong> Auto thefts and break-ins are rising due to nearby highways (5, 6, 403, 407), which provide easy escape routes. Police encourage reporting all incidents to improve tracking and response.</li>
+            </ul>
+        </section>
+    </div>
+</body>
+</html>
